@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- What are each of these lines of code doing? -->
+    <title>Homepage</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+    <!-- What is happening in this top navigation bar? -->
+    <div class="topnav" id="myTopnav">
+        <a href="#" class="disabled">Homepage</a>
+        <div class="topnav-right">
+            <a href="inputs.html">Inputs</a>
+            <a href="outputs.html">Outputs</a>
+        </div>
+        <a href="javascript:void(0);" class="icon" onclick="handleNavBar()">
+            <i class="fa fa-bars"></i>
+        </a>
+    </div>
+    <!-- What is happening in this block of code? -->
+    <div class="content">
+        <h1>Welcome to my web server</h1>
+        <p>Here is some <bold>simple</bold> input output for the red LED.
+            But look on the Inputs and Outputs pages for more detailed stuff.
+        </p>
+        <div class="card-grid">
+            <div class="card">
+                <p class="card-title">Built-in LED</p>
+                <p>
+                    <a href="on"><button class="button-on">ON</button></a>
+                    <a href="off"><button class="button-off">OFF</button></a>
+                </p>
+                <p class="state">The led is: %STATE%</p>
+            </div>
+        </div>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
