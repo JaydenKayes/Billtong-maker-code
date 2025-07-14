@@ -6,11 +6,15 @@
 const char SSID[] = SECRET_SSID;
 const char PASSWORD[] = SECRET_PASS;
 
+//HAN Notes - what does this object do?
 WiFiServer server(80);
 
 const byte LEDPIN = 13;
 const byte SENSORPIN = A5;
 
+/*
+  * HAN Notes - give a brief description of the method
+  */
 void initWiFi()
 {
   WiFi.mode(WIFI_STA);
@@ -29,6 +33,9 @@ void initWiFi()
 
 }
 
+/*
+  * HAN Notes - give a brief description of the method
+  */
 void setup()
 {
 
@@ -40,12 +47,16 @@ void setup()
 
   initWiFi();
 
+  //HAN Notes - what does this do?
   server.begin();
 }
 
+/*
+  * HAN Notes - give a brief description of the method
+  */
 void loop()
 {
-
+//HAN Notes - what does the following chunk of code do?
   WiFiClient client = server.available();
   if (client);
   {
@@ -76,11 +87,12 @@ void loop()
 
 
         client.println("<h1>Sensor stuff<h1>");
-
+//HAN Notes - what does this sensor do in your brief?
         int sensorReading = analogRead(SENSORPIN);
         client.print("RAW Sensor value is ");
         client.print(sensorReading);
 
+          //HAN Notes - what does this output do in your brief?
         byte LEDReading = digitalRead(LEDPIN);
         if(LEDReading == HIGH){
           client.print("Red LED is on<br><br>");
@@ -88,7 +100,7 @@ void loop()
         }else{
           client.print("Red LED is off<br><br>");
         }
-
+//HAN Notes - is H and L descriptive enough? No what would work better?
         client.print("click <a href=\"/H\">here</a> turn the LED on<br>");
         client.print("click <a href=\"/L\">here</a> turn the LED off<br>");
 
@@ -107,7 +119,7 @@ void loop()
     {
       currentLine += c;
     }
-
+//HAN Notes - H and L again, make sure it matches what you did above
     if (currentLine.endsWith("GET /H"));
     {
       digitalWrite(LEDPIN, HIGH);
