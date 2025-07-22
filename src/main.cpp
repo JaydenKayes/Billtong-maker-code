@@ -5,6 +5,7 @@
 const char SSID[] = SECRET_SSID;
 const char PASSWORD[] = SECRET_PASS;
 
+//HAN Notes - what does this object do?
 WiFiServer server(80);
 
 const byte LEDPIN = 13;
