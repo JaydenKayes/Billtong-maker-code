@@ -9,7 +9,7 @@ body {
 
 h1 {
     font-size: 1.8rem;
-    color: white;
+    color: rgb(251, 251, 251);
 }
 /*--------------------- 
 Card grid styles
@@ -28,14 +28,14 @@ Card grid styles
 }
 
 .card {
-    background-color: white;
+    background-color: rgb(249, 3, 171);
     box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
 }
 
 .card-title {
     font-size: 1.2rem;
     font-weight: bold;
-    color: #034078;
+    color: #deff08;
 }
 
 /*--------------------- 
@@ -81,14 +81,14 @@ Navigation bar styles
 /* what does this do? */
 .topnav {
     overflow: hidden;
-    background-color: #0A1128;
+    background-color: #00f600;
 }
 
 /* what does this do? */
 .topnav a {
     float: left;
     display: block;
-    color: white;
+    color: rgb(249, 248, 248);
     text-align: center;
     padding: 16px 18px;
     text-decoration: none;
