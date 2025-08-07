@@ -1,108 +1,96 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include "arduino_secrets.h"
+#include "arduino_secrets.h" // Contains SSID and PASSWORD
 
 const char SSID[] = SECRET_SSID;
 const char PASSWORD[] = SECRET_PASS;
 
-//HAN Notes - what does this object do?
-WiFiServer server(80);
+WiFiServer server(80); // Web server runs on port 80
 
-const byte LEDPIN = 13;
-const byte SENSORPIN = A5;
+const int LED_PIN = 13;      // Built-in LED pin
+const int SENSOR_PIN = 34;   // Valid analog pin for ESP32
 
-// Function prototype for flashLED
-void flashLED(int interval_ms, int repeatCount);
+// Flashes LED on and off for a given number of times
+void flashLED(int interval_ms, int repeatCount) {
+  for (int i = 0; i < repeatCount; i++) {
+    digitalWrite(LED_PIN, HIGH);
+    delay(interval_ms);
+    digitalWrite(LED_PIN, LOW);
+    delay(interval_ms);
+  }
+}
 
-void initWiFi() {
+// Connect to WiFi network
+void connectToWiFi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(SSID, PASSWORD);
   Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
-    Serial.print('.');
+    Serial.print(".");
     delay(500);
   }
-  Serial.println();
-  Serial.print("Connected: ");
-  Serial.println(SSID);
-  Serial.print("IP Address: http://");
+  Serial.println("\nConnected to WiFi!");
+  Serial.print("IP address: http://");
   Serial.println(WiFi.localIP());
 }
 
 void setup() {
-  pinMode(LEDPIN, OUTPUT);
-  pinMode(SENSORPIN, INPUT);
-  Serial.begin(115200);
+  Serial.begin(115200);  // Start serial monitor
   delay(1000);
-  initWiFi();
-  server.begin();
+
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(SENSOR_PIN, INPUT);
+
+  connectToWiFi(); // Start WiFi connection
+  server.begin();  // Start web server
+}
+
+// Handle a connected web client
+void handleClient(WiFiClient client) {
+  String request = client.readStringUntil('\r'); // Read HTTP request line
+  Serial.println(request);
+
+  // LED control via URL
+  if (request.indexOf("GET /H") >= 0) {
+    digitalWrite(LED_PIN, HIGH);  // Turn LED on
+  } else if (request.indexOf("GET /L") >= 0) {
+    digitalWrite(LED_PIN, LOW);   // Turn LED off
+  }
+
+  // Read sensor and LED state
+  int sensorValue = analogRead(SENSOR_PIN);
+  bool ledState = digitalRead(LED_PIN);
+
+  // Send basic HTML response
+  client.println("HTTP/1.1 200 OK");
+  client.println("Content-Type: text/html");
+  client.println("Connection: close");
+  client.println();
+  client.println("<!DOCTYPE html><html>");
+  client.println("<head><meta http-equiv='refresh' content='5'><style>body{font-family:Arial;}</style></head>");
+  client.println("<body>");
+  client.println("<h1>Sensor Status</h1>");
+  client.print("<p>Raw Value: ");
+  client.print(sensorValue);
+  client.println("</p>");
+  client.print("<p>Red LED is ");
+  client.print(ledState ? "ON" : "OFF");
+  client.println("</p>");
+  client.println("<a href=\"/H\">Turn LED ON</a><br>");
+  client.println("<a href=\"/L\">Turn LED OFF</a><br>");
+  client.println("</body></html>");
+  client.flush();
+  delay(10);
+  client.stop(); // End connection
+  Serial.println("Client disconnected");
 }
 
 void loop() {
-  // Flash LED 5 times with 500 ms interval
-  flashLED(500, 5);
+  flashLED(500, 5); // Blink LED for feedback
 
-  WiFiClient client = server.available();
+  WiFiClient client = server.available(); // Check for incoming connection
   if (client) {
     Serial.println("New client connected");
-    String currentLine = "";
-
-    while (client.connected()) {
-      if (client.available()) {
-        char c = client.read();
-        Serial.write(c);
-
-        if (c == '\n') {
-          // Blank line = end of HTTP headers
-          if (currentLine.length() == 0) {
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-Type: text/html");
-            client.println("Connection: close");
-            client.println("Refresh: 5");
-            client.println();
-            client.println("<!DOCTYPE HTML><html>");
-            client.println("<style>html{font-family:Arial;}</style>");
-            client.println("<h1>Sensor Status</h1>");
-
-            int sensorReading = analogRead(SENSORPIN);
-            client.print("Raw value: ");
-            client.println(sensorReading);
-
-            bool ledState = digitalRead(LEDPIN);
-            client.print("Red LED is ");
-            client.println(ledState ? "ON" : "OFF");
-
-            client.println("<br><a href=\"/H\">Turn LED ON</a><br>");
-            client.println("<a href=\"/L\">Turn LED OFF</a><br>");
-            client.println("</html>");
-            break;
-          } else {
-            // Analyze request line
-            if (currentLine.endsWith("GET /H")) {
-              digitalWrite(LEDPIN, HIGH);
-            }
-            if (currentLine.endsWith("GET /L")) {
-              digitalWrite(LEDPIN, LOW);
-            }
-            currentLine = "";
-          }
-        } else if (c != '\r') {
-          currentLine += c;
-        }
-      }
-    }
-
-    client.stop();
-    Serial.println("Client disconnected");
-  }
-}
-
-// Definition of flashLED
-void flashLED(int interval_ms, int repeatCount) {
-  for (int i = 0; i < repeatCount; ++i) {
-    digitalWrite(LEDPIN, HIGH);
-    delay(interval_ms);
-    digitalWrite(LEDPIN, LOW);
-    delay(interval_ms);
+    handleClient(client);
   }
 }

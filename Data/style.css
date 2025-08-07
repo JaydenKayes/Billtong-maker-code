@@ -1,46 +1,43 @@
 html {
-    font-family: Arial, Helvetica, sans-serif;
-    text-align: center;
+    font-family: Arial, Helvetica, sans-serif; /* Font */
+    text-align: center; /* Center content */
 }
 
 body {
-    margin: 0px auto;
+    margin: 0 auto; /* Remove default margin */
 }
 
 h1 {
-    font-size: 1.8rem;
-    color: rgb(251, 251, 251);
+    font-size: 1.8rem; /* Header size */
+    color: rgb(251, 251, 251); /* White */
 }
-/*--------------------- 
-Card grid styles
----------------------*/
+
+/* ----- Main content spacing ----- */
 .content {
     padding: 50px;
 }
 
+/* ----- Card layout ----- */
 .card-grid {
     max-width: 800px;
     margin: 0 auto;
     display: grid;
     gap: 2rem;
-    /*grid-gap*/
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* Responsive cards */
 }
 
 .card {
-    background-color: rgb(249, 3, 171);
-    box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+    background-color: rgb(249, 3, 171); /* Pink card */
+    box-shadow: 2px 2px 12px rgba(140, 140, 140, 0.5); /* Shadow */
 }
 
 .card-title {
     font-size: 1.2rem;
     font-weight: bold;
-    color: #deff08;
+    color: #deff08; /* Lime */
 }
 
-/*--------------------- 
-Button styles
----------------------*/
+/* ----- Button styling ----- */
 button {
     border: none;
     color: #FEFCFB;
@@ -50,7 +47,7 @@ button {
     font-size: 16px;
     width: 100px;
     border-radius: 4px;
-    transition-duration: 0.4s;
+    transition: 0.4s; /* Smooth hover */
 }
 
 .button-on {
@@ -74,63 +71,51 @@ button {
     color: #1282A2;
 }
 
-/*--------------------- 
-Navigation bar styles
----------------------*/
-
-/* what does this do? */
+/* ----- Top navigation bar ----- */
 .topnav {
     overflow: hidden;
-    background-color: #00f600;
+    background-color: #00f600; /* Bright green */
 }
 
-/* what does this do? */
 .topnav a {
     float: left;
     display: block;
-    color: rgb(249, 248, 248);
+    color: #f9f8f8;
     text-align: center;
     padding: 16px 18px;
     text-decoration: none;
     font-size: 1.2rem;
 }
 
-/* what does this do? */
 .topnav a:hover {
     background-color: #186775;
     color: white;
 }
 
-/* what does this do? */
 .disabled {
-    pointer-events: none;
+    pointer-events: none; /* Makes link unclickable */
 }
 
-/* what does this do? */
 .topnav .icon {
-    display: none;
+    display: none; /* Hide hamburger by default */
 }
-/* what does this do? */
+
 .topnav-right {
     float: right;
 }
 
-/* what does this do? */
+/* ----- Responsive nav for small screens ----- */
 @media screen and (max-width: 600px) {
-
-    /* what does this do? */
     .topnav.responsive {
         position: relative;
     }
 
-    /* what does this do? */
     .topnav.responsive .icon {
         position: absolute;
         right: 0;
         top: 0;
     }
 
-    /* what does this do? */
     .topnav.responsive a,
     .topnav.responsive .topnav-right {
         float: none;
