@@ -1,50 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <title>Homepage</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="style.css"> <!-- Connects CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> <!-- Icon library -->
+  <title>Biltong Maker Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
-  <!-- Top nav bar -->
-  <div class="topnav" id="myTopnav">
-    <a href="#" class="disabled">Homepage</a>
-    <div class="topnav-right">
-      <a href="inputs.html">Inputs</a>
-      <a href="outputs.html">Outputs</a>
-    </div>
-    <!-- Hamburger menu for small screens -->
-    <a href="javascript:void(0);" class="icon" onclick="handleNavBar()">
-      <i class="fa fa-bars"></i>
-    </a>
+  <h1>Biltong Maker Control Panel</h1>
+
+  <!-- Live Readings -->
+  <div class="status">
+    <p>🌡️ Temperature: <span id="temp">--</span> °C</p>
+    <p>💧 Humidity: <span id="hum">--</span> %</p>
+    <p>Fan: <span id="fan">--</span></p>
+    <p>Lamp: <span id="lamp">--</span></p>
+    <p>Sensors: <span id="sensors">ON</span></p>
   </div>
 
-  <!-- Main section -->
-  <div class="content">
-    <h1>Welcome to my web server</h1>
-    <p>
-      Here is some <strong>simple</strong> input/output control for the red LED.
-      Check out the Inputs and Outputs pages for more.
-    </p>
-
-    <!-- LED control card -->
-    <div class="card-grid">
-      <div class="card">
-        <p class="card-title">Built-in LED</p>
-        <p>
-          <a href="/H"><button class="button-on">ON</button></a>
-          <a href="/L"><button class="button-off">OFF</button></a>
-        </p>
-        <p class="state">The LED is: %STATE%</p> <!-- Placeholder for status -->
-      </div>
-    </div>
+  <!-- Control Buttons -->
+  <div class="controls">
+    <button onclick="toggleFan(true)">Fan ON</button>
+    <button onclick="toggleFan(false)">Fan OFF</button>
+    <button onclick="toggleLamp(true)">Lamp ON</button>
+    <button onclick="toggleLamp(false)">Lamp OFF</button>
+    <button onclick="toggleSensors()">Toggle Sensors</button>
   </div>
 
-  <script src="script.js"></script> <!-- JavaScript functions -->
+  <!-- Graph -->
+  <div class="chart-container">
+    <canvas id="dataChart"></canvas>
+  </div>
+
+  <script src="script.js"></script>
 </body>
-
 </html>
