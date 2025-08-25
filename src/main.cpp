@@ -15,6 +15,7 @@ const int LAMP_PIN = 27;      // Heat lamp relay output
 const int DHT_PIN = 4;        // DHT22 sensor input pin
 
 // --- DHT Setup ---
+//HAN NOTES - What sensor are you using? I had the AHT20 and BMP280 available in class?
 #define DHTTYPE DHT22         // Change to DHT11 if using that sensor
 DHT dht(DHT_PIN, DHTTYPE);
 
@@ -74,6 +75,8 @@ void handleClient(WiFiClient client) {
   float temp = dht.readTemperature();
   float hum = dht.readHumidity();
 
+  //HAN NOTES - I haven't talked to you about logic commands like isnan and ||
+  //can you explain it further?
   // If sensor failed, set fallback values
   if (isnan(temp) || isnan(hum)) {
     Serial.println("Failed to read from DHT sensor!");
