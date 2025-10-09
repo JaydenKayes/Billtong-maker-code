@@ -4,74 +4,83 @@
 #include "DHT.h" // Library for temperature and humidity sensor
 
 // --- WiFi Setup ---
-const char SSID[] = SECRET_SSID;      // Network name
-const char PASSWORD[] = SECRET_PASS;  // Network password
-WiFiServer server(80);                // Creates a web server on port 80
+// These store your WiFi credentials from the secrets file.
+const char SSID[] = SECRET_SSID;      
+const char PASSWORD[] = SECRET_PASS;  
+WiFiServer server(80); // Creates a web server on port 80 to serve the webpage
 
 // --- Pin Assignments ---
-const int LED_PIN = 13;       // Indicator LED (optional)
-const int FAN_PIN = 26;       // Fan relay output
-const int LAMP_PIN = 27;      // Heat lamp relay output
-const int DHT_PIN = 4;        // DHT sensor data pin
+// Assign physical pins on ESP32 for outputs and sensor input
+const int LED_PIN = 13;       // Optional indicator LED
+const int FAN_PIN = 26;       // Relay controlling fan
+const int LAMP_PIN = 27;      // Relay controlling heat lamp
+const int DHT_PIN = 4;        // Pin connected to DHT sensor data line
 
-// --- DHT Setup ---
-#define DHTTYPE DHT11         // Choose between DHT11 or DHT22 sensor
-DHT dht(DHT_PIN, DHTTYPE);    // Initialize DHT sensor
+// --- DHT Sensor Setup ---
+// DHT22 chosen because it has better accuracy than DHT11
+#define DHTTYPE DHT22         
+DHT dht(DHT_PIN, DHTTYPE);    // Initialize DHT sensor object
 
 // --- Thresholds for automatic control ---
-const float TEMP_THRESHOLD = 30.0;   // Max temperature before fan turns on
-const float HUMID_THRESHOLD = 70.0;  // Max humidity before fan turns on
+// If temperature or humidity exceeds these, automatic rules trigger
+const float TEMP_THRESHOLD = 30.0;   
+const float HUMID_THRESHOLD = 70.0;  
 
 // --- Device States ---
-bool fanState = false;  // Stores fan ON/OFF status
-bool lampState = false; // Stores lamp ON/OFF status
+// Keep track of whether the fan and lamp are ON or OFF
+bool fanState = false;  
+bool lampState = false; 
 
-// --- Connects to WiFi network ---
+// --- Function: Connect to WiFi ---
+// Handles connecting the ESP32 to your WiFi network
 void connectToWiFi() {
-  WiFi.mode(WIFI_STA);                // Set WiFi mode to station
-  WiFi.begin(SSID, PASSWORD);         // Connect to WiFi
+  WiFi.mode(WIFI_STA);                // Set ESP32 to station mode
+  WiFi.begin(SSID, PASSWORD);         // Start connection to network
   Serial.print("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED) { // Wait until connected
-    Serial.print(".");
+  
+  // Wait until ESP32 is connected
+  while (WiFi.status() != WL_CONNECTED) { 
+    Serial.print("."); // Print dots while connecting
     delay(500);
   }
+
+  // Print confirmation and IP address
   Serial.println("\nConnected to WiFi!");
   Serial.print("IP address: http://");
-  Serial.println(WiFi.localIP());     // Print device IP address
+  Serial.println(WiFi.localIP());     
 }
 
-// --- Function to check if the DHT sensor is working properly ---
+// --- Function: Check if DHT sensor is working ---
+// Returns true if sensor readings are valid, false otherwise
 bool checkDHTSensor() {
-  // Try to read both temperature and humidity values
-  float temp = dht.readTemperature();
+  float temp = dht.readTemperature(); 
   float hum = dht.readHumidity();
 
-  // If either reading is NaN (not a number), the sensor isn’t responding correctly
+  // If either reading is invalid (NaN), sensor has failed
   if (isnan(temp) || isnan(hum)) {
     Serial.println("⚠️ ERROR: DHT sensor not working! Check wiring, power, or sensor connection.");
-    return false; // Return false meaning the sensor has failed
+    return false; 
   }
 
-  // If both readings are valid, return true meaning the sensor is working
+  // Sensor is responding correctly
   return true;
 }
 
 void setup() {
-  Serial.begin(115200);
-  delay(1000);
+  Serial.begin(115200); // Start Serial monitor for debugging
+  delay(1000);          // Wait 1 second to stabilize
 
-  // Setup pin modes
-  pinMode(LED_PIN, OUTPUT);
-  pinMode(FAN_PIN, OUTPUT);
-  pinMode(LAMP_PIN, OUTPUT);
+  // --- Setup pin modes ---
+  pinMode(LED_PIN, OUTPUT); // Optional indicator LED
+  pinMode(FAN_PIN, OUTPUT); // Control fan relay
+  pinMode(LAMP_PIN, OUTPUT);// Control lamp relay
 
-  dht.begin();        // Start DHT sensor
-  connectToWiFi();    // Connect to WiFi network
-  server.begin();     // Start web server
+  dht.begin();        // Start DHT sensor communication
+  connectToWiFi();    // Connect ESP32 to WiFi
+  server.begin();     // Start web server to serve webpage
 
-  // --- Initial sensor check at startup ---
-  // This checks if the DHT sensor is connected and giving valid readings.
-  // If not, a warning will appear in the Serial Monitor before anything else runs.
+  // --- Initial sensor check ---
+  // Ensures DHT is working at startup
   if (!checkDHTSensor()) {
     Serial.println("⚠️ DHT sensor failed to initialize properly! Readings may not be accurate.");
   } else {
@@ -79,12 +88,14 @@ void setup() {
   }
 }
 
-// --- Handles webpage requests and manual button commands ---
+// --- Function: Handle client requests for webpage ---
+// Reads URL commands and updates fan/lamp or shows sensor values
 void handleClient(WiFiClient client) {
-  String request = client.readStringUntil('\r'); // Read incoming request
+  String request = client.readStringUntil('\r'); // Read HTTP request line
   Serial.println(request);
 
-  // --- Manual control commands via URL ---
+  // --- Manual control via URL ---
+  // Example: /fanOn turns fan on manually
   if (request.indexOf("GET /fanOn") >= 0) {
     fanState = true;
   } else if (request.indexOf("GET /fanOff") >= 0) {
@@ -99,29 +110,31 @@ void handleClient(WiFiClient client) {
   float temp = dht.readTemperature();
   float hum = dht.readHumidity();
 
-  // --- Handle sensor read errors ---
-  // If the sensor doesn’t respond, both temp and hum will be NaN (not a number).
-  // When this happens, it will print a clear error message to the Serial Monitor.
+  // --- Check for sensor errors ---
+  // isnan() checks if value is invalid; || means OR
+  // If either temp or hum is NaN, use safe fallback values
   if (isnan(temp) || isnan(hum)) {
-    Serial.println("⚠️ ERROR: Failed to read from DHT sensor during client request! Possible disconnection or malfunction.");
-    temp = -99; // Placeholder value so the program keeps running safely
-    hum = -99;  // Placeholder for humidity
+    Serial.println("⚠️ ERROR: Failed to read from DHT sensor during client request!");
+    temp = -99; // Placeholder value to keep program running
+    hum = -99;  
   }
 
-  // --- Automatic fan/lamp control rules ---
+  // --- Automatic control rules ---
+  // Fan turns on if too hot or too humid
+  // Lamp turns off if too hot to prevent extra heating
   if (temp > TEMP_THRESHOLD) {
-    fanState = true;   // Turn fan on if too hot
-    lampState = false; // Turn off lamp to prevent extra heat
+    fanState = true;
+    lampState = false;
   }
   if (hum > HUMID_THRESHOLD) {
-    fanState = true;   // Turn on fan if humidity too high
+    fanState = true;
   }
 
   // --- Update output pins ---
-  digitalWrite(FAN_PIN, fanState ? HIGH : LOW);
-  digitalWrite(LAMP_PIN, lampState ? HIGH : LOW);
+  digitalWrite(FAN_PIN, fanState ? HIGH : LOW);   // Turn fan on/off
+  digitalWrite(LAMP_PIN, lampState ? HIGH : LOW); // Turn lamp on/off
 
-  // --- Send HTML webpage back to client ---
+  // --- Send webpage to client ---
   client.println("HTTP/1.1 200 OK");
   client.println("Content-Type: text/html");
   client.println("Connection: close");
@@ -133,17 +146,17 @@ void handleClient(WiFiClient client) {
   // --- JavaScript for live sensor updates ---
   client.println("<script>");
   client.println("async function refreshData(){");
-  client.println("  let r=await fetch('/data');");
-  client.println("  let j=await r.json();");
+  client.println("  let r=await fetch('/data');"); // Get JSON from server
+  client.println("  let j=await r.json();");       // Parse JSON
   client.println("  document.getElementById('temp').innerText=j.temp+' °C';");
   client.println("  document.getElementById('hum').innerText=j.hum+' %';");
   client.println("  document.getElementById('fan').innerText=j.fan?'ON':'OFF';");
   client.println("  document.getElementById('lamp').innerText=j.lamp?'ON':'OFF';");
   client.println("}");
-  client.println("setInterval(refreshData,2000);"); // Auto refresh every 2 seconds
+  client.println("setInterval(refreshData,2000);"); // Update every 2 seconds
   client.println("</script></head>");
   
-  // --- Simple HTML layout for display and control ---
+  // --- HTML layout for display and buttons ---
   client.println("<body onload='refreshData()'>");
   client.println("<h1>Biltong Maker Control</h1>");
   client.println("<p>Temperature: <span id='temp'>--</span></p>");
@@ -156,26 +169,25 @@ void handleClient(WiFiClient client) {
   client.println("<button onclick=\"fetch('/lampOff')\">Lamp OFF</button>");
   client.println("</body></html>");
   
-  client.flush();  // Ensure data is sent
+  client.flush();  // Make sure all data sent
   delay(10);
   client.stop();   // Close connection
 }
 
-// --- Sends live temperature/humidity data in JSON format ---
+// --- Function: Send JSON sensor data ---
+// This is used by JavaScript on webpage to show live readings
 void handleData(WiFiClient client) {
   float temp = dht.readTemperature();
   float hum = dht.readHumidity();
 
-  // --- Default fallback if sensor fails ---
-  // If readings fail, print an error message and send a -99 value
-  // to the webpage to indicate an issue with the sensor.
+  // --- Handle sensor errors ---
   if (isnan(temp) || isnan(hum)) {
-    Serial.println("⚠️ ERROR: DHT sensor not working during data request! Sending fallback values (-99).");
+    Serial.println("⚠️ ERROR: DHT sensor not working during data request!");
     temp = -99;
     hum = -99;
   }
 
-  // --- Send JSON data to client ---
+  // --- Send JSON response ---
   client.println("HTTP/1.1 200 OK");
   client.println("Content-Type: application/json");
   client.println("Connection: close");
@@ -200,14 +212,12 @@ void loop() {
   WiFiClient client = server.available();
   if (client) {
     Serial.println("New client connected");
-    String reqLine = client.readStringUntil('\n'); // Read request line
+    String reqLine = client.readStringUntil('\n'); // Read HTTP request line
     Serial.println(reqLine);
     
-    // --- Route request to correct handler ---
-    // If the client requests “/data”, send JSON.
-    // Otherwise, load the main webpage.
+    // --- Route requests ---
     if (reqLine.indexOf("GET /data") >= 0) {
-      handleData(client);     // Return JSON data
+      handleData(client);     // Return live JSON data
     } else {
       handleClient(client);   // Return webpage
     }
