@@ -3,35 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <title>Biltong Maker Dashboard</title>
+
+  <!-- Link to external CSS file for styling -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- Load Chart.js library for live temperature/humidity graphs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <!-- Main heading -->
   <h1>Biltong Maker Control Panel</h1>
 
-  <!-- Live Readings -->
+  <!-- Section showing live sensor readings -->
   <div class="status">
-    <p>🌡️ Temperature: <span id="temp">--</span> °C</p>
-    <p>💧 Humidity: <span id="hum">--</span> %</p>
-    <p>Fan: <span id="fan">--</span></p>
-    <p>Lamp: <span id="lamp">--</span></p>
-    <p>Sensors: <span id="sensors">ON</span></p>
+    <p>🌡️ Temperature: <span id="temp">--</span> °C</p>  <!-- Displays current temperature -->
+    <p>💧 Humidity: <span id="hum">--</span> %</p>       <!-- Displays current humidity -->
+    <p>Fan: <span id="fan">--</span></p>                <!-- Shows fan ON/OFF status -->
+    <p>Lamp: <span id="lamp">--</span></p>              <!-- Shows lamp ON/OFF status -->
+    <p>Sensors: <span id="sensors">ON</span></p>        <!-- Indicates if sensors are active -->
   </div>
 
-  <!-- Control Buttons -->
+  <!-- Section with control buttons for devices -->
   <div class="controls">
-    <button onclick="toggleFan(true)">Fan ON</button>
-    <button onclick="toggleFan(false)">Fan OFF</button>
-    <button onclick="toggleLamp(true)">Lamp ON</button>
-    <button onclick="toggleLamp(false)">Lamp OFF</button>
-    <button onclick="toggleSensors()">Toggle Sensors</button>
+    <button onclick="toggleFan(true)">Fan ON</button>     <!-- Turns fan on -->
+    <button onclick="toggleFan(false)">Fan OFF</button>   <!-- Turns fan off -->
+    <button onclick="toggleLamp(true)">Lamp ON</button>   <!-- Turns lamp on -->
+    <button onclick="toggleLamp(false)">Lamp OFF</button> <!-- Turns lamp off -->
+    <button onclick="toggleSensors()">Toggle Sensors</button> <!-- Enables/disables sensors -->
   </div>
 
-  <!-- Graph -->
+  <!-- Section containing live data graph -->
   <div class="chart-container">
-    <canvas id="dataChart"></canvas>
+    <canvas id="dataChart"></canvas> <!-- Chart.js draws the graph here -->
   </div>
 
+  <!-- Link to external JavaScript file that handles logic and updates -->
   <script src="script.js"></script>
 </body>
 </html>
